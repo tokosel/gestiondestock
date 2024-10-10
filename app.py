@@ -26,6 +26,7 @@ db_produits = mongo.db.produits
 db_achats = mongo.db.achats
 db_ventes = mongo.db.ventes
 app.config['STATIC_FOLDER'] = 'static'
+
 # Décorateur pour vérifier si l'utilisateur est connecté
 def login_required(f):
     @wraps(f)
