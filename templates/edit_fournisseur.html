@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="h4 text-gray-900 mb-4">Modifier le Fournisseur</h1>
+    <form id="editFournisseurForm" method="POST">
+        <div class="form-group">
+            <label for="nom">Nom</label>
+            <input type="text" class="form-control" name="nom" id="nom" value="{{ fournisseur['nom'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="contact">Contact</label>
+            <input type="text" class="form-control" name="contact" id="contact" value="{{ fournisseur['contact'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" name="email" id="email" value="{{ fournisseur['email'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="adresse">Adresse</label>
+            <input type="text" class="form-control" name="adresse" id="adresse" value="{{ fournisseur['adresse'] }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+        <a href="{{ url_for('show_fournisseurs') }}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Gestion de la soumission du formulaire avec AJAX
+        $('#editFournisseurForm').on('submit', function (event) {
+            event.preventDefault(); // Empêche l'envoi normal du formulaire
+
+            // Récupérer les valeurs du formulaire
+            let fournisseurData = {
+                nom: $('#nom').val(),
+                contact: $('#contact').val(),
+                email: $('#email').val(),
+                adresse: $('#adresse').val()
+            };
+
+            // Effectuer la requête AJAX pour mettre à jour le fournisseur
+            $.ajax({
+                type: 'POST',
+                url: "{{ url_for('edit_fournisseur', id=fournisseur['_id']) }}",
+                contentType: 'application/json',
+                data: JSON.stringify(fournisseurData),
+                success: function (response) {
+                    if (response.status === "success") {
+                        Swal.fire({
+                            title: 'Succès!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = "{{ url_for('show_fournisseurs') }}"; // Redirection vers la liste des fournisseurs
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erreur!',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        title: 'Erreur!',
+                        text: "Une erreur s'est produite lors de la modification du fournisseur.",
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

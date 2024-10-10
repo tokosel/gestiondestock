@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <p class="mb-2 text-gray-800">Liste des Fournisseurs</p>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des Fournisseurs</h6>
+            <a href="{{ url_for('add_fournisseur') }}" class="btn btn-primary">Ajouter Fournisseur</a>
+        </div>        
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Adresse</th>
+                            <th>Date de Création</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fournisseur in fournisseurs %}
+                        <tr>
+                            <td>{{ fournisseur['nom'] }}</td>
+                            <td>{{ fournisseur['contact'] }}</td>
+                            <td>{{ fournisseur['email'] }}</td>
+                            <td>{{ fournisseur['adresse'] }}</td>
+                            <td>{{ fournisseur['date_creation'] }}</td>
+                            <td>{{ fournisseur['statut'] }}</td>
+                            <td>
+                                <a title="Modifier" href="{{ url_for('edit_fournisseur', id=fournisseur['_id']) }}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button title="Archiver" class="btn btn-danger btn-sm" onclick="confirmArchive('{{ fournisseur['_id'] }}')">
+                                    <i class="fas fa-archive"></i>
+                                </button>
+                                
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmArchive(fournisseurId) {
+        Swal.fire({
+            title: 'Êtes-vous sûr?',
+            text: "Vous allez archiver ce fournisseur!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui, archiver!',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Si l'utilisateur confirme, faire une requête AJAX pour archiver le fournisseur
+                fetch(`/archive_fournisseur/${fournisseurId}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Afficher un message de succès avec SweetAlert
+                        Swal.fire({
+                            title: 'Archivé!',
+                            text: 'Le fournisseur a été archivé avec succès.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Recharger la page après avoir affiché le message de succès
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Erreur', 'Un problème est survenu lors de l\'archivage.', 'error');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Erreur', 'Une erreur réseau est survenue.', 'error');
+                });
+            }
+        });
+    }
+    </script>
+    
+
+    
+    
+
+{% endblock %}

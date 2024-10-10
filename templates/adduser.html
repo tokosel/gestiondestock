@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="card o-hidden border-0 shadow-lg my-5">
+        <div class="card-body p-0">
+            <div class="row">
+                <div class="col-lg-10 offset-1">
+                    <div class="p-5">
+                        <div class="text-center">
+                            <h1 class="h4 text-gray-900 mb-4">AJOUT D'UN UTILISATEUR</h1>
+                        </div>
+                        <hr class="mb-4">
+                        <form id="addUserForm" class="user">
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <input type="text" class="form-control" name="name" placeholder="Nom" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <select class="form-control" name="role" required>
+                                        <option value="" disabled selected>Sélectionnez un rôle</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="caissier">Caissier(e)</option>
+                                        <option value="vendeur">Vendeur(se)</option>
+                                    </select>
+                                    
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" class="form-control" name="email" placeholder="Adresse Email" required>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <input type="password" class="form-control" name="password" placeholder="Mot de passe" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="password" class="form-control" name="confirm_password" placeholder="Confirmer Mot de passe" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Ajouter Utilisateur
+                            </button>
+                            <hr>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#addUserForm').on('submit', function (event) {
+            event.preventDefault(); // Empêche l'envoi normal du formulaire
+
+            $.ajax({
+                type: 'POST',
+                url: "{{ url_for('add_user') }}",
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.status === "success") {
+                        Swal.fire({
+                            title: 'Succès!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Recharge la page pour voir le nouvel utilisateur
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erreur!',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

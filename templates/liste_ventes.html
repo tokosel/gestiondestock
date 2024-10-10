@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <p class="mb-2 text-gray-500"> Sama Stock / Opérations / Liste des Ventes</p>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Liste des Ventes</h6>
+            <a href="{{ url_for('operation') }}" class="btn btn-primary">Ajouter vente</a>
+        </div>        
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Nom du Produit</th>
+                            <th>Quantité</th>
+                            <th>Prix</th>
+                            <th>Montant</th>
+                            <th>Date de Vente</th>
+                            <th>Opérateur</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vente in ventes %}
+                        <tr>
+                            <td>{{ vente.produit_nom }}</td>
+                            <td>{{ vente.quantite_achetee }}</td>
+                            <td>{{ vente.prix }}</td>
+                            <td>{{ vente.montant }}</td>
+                            <td>{{ vente.date_vente.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ vente.operateur }}</td>
+                            <td>
+                                <a title="Modifier" href="{{ url_for('edit_vente', id=vente._id) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

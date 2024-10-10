@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card o-hidden border-0 shadow-lg my-5">
+        <div class="card-body p-0">
+            <div class="row">
+                <div class="col-lg-10 offset-1">
+                    <div class="p-5">
+                        <div class="text-center">
+                            <h1 class="h4 text-gray-900 mb-4">AJOUT D'UN FOURNISSEUR</h1>
+                        </div>
+                        <form id="addFournisseurForm" class="user">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="nom" placeholder="Nom du fournisseur" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="contact" placeholder="Téléphone Ex : 774640304" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" class="form-control" name="email" placeholder="Adresse Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="adresse" placeholder="Adresse" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Ajouter Fournisseur
+                            </button>
+                            <hr>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#addFournisseurForm').on('submit', function (event) {
+            event.preventDefault(); // Empêche l'envoi normal du formulaire
+
+            $.ajax({
+                type: 'POST',
+                url: "{{ url_for('add_fournisseur') }}",
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.status === "success") {
+                        Swal.fire({
+                            title: 'Succès!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Recharge la page pour voir le nouvel fournisseur
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erreur!',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        title: 'Erreur!',
+                        text: "Une erreur s'est produite lors de l'ajout du fournisseur.",
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

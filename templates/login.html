@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login</title>
+    
+    <!-- Lien vers le CSS de Bootstrap -->
+<link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+<!-- Lien vers jQuery et SweetAlert -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-12 col-md-9">
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                    </div>
+                                    <form class="user" id="loginForm">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control form-control-user"
+                                                id="exampleInputEmail" aria-describedby="emailHelp"
+                                                placeholder="Enter Email Address..." required>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" class="form-control form-control-user"
+                                                id="exampleInputPassword" placeholder="Password" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox small">
+                                                <input type="checkbox" class="custom-control-input" id="customCheck">
+                                                <label class="custom-control-label" for="customCheck">Remember Me</label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                                            Login
+                                        </button>
+                                        <hr>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script pour gérer le formulaire de connexion -->
+    <script>
+        $(document).ready(function() {
+            $('#loginForm').on('submit', function(event) {
+                event.preventDefault(); // Empêche l'envoi normal du formulaire
+
+                const email = $('#exampleInputEmail').val();
+                const password = $('#exampleInputPassword').val();
+
+                // Appel AJAX pour authentifier l'utilisateur
+                $.ajax({
+                    type: 'POST',
+                    url: '/login', // URL du endpoint de connexion
+                    data: {
+                        email: email,
+                        password: password
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            swal("Succès", "Connexion réussie!", "success").then(() => {
+                                window.location.href = '/'; // Redirige vers le tableau de bord
+                            });
+                        } else {
+                            // Affiche un message d'erreur avec SweetAlert
+                            swal("Erreur", response.message, "error");
+                        }
+                    },
+                    error: function() {
+                        swal("Erreur", "Une erreur s'est produite lors de la connexion.", "error");
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            // Remplacer la logique de confirmation de déconnexion par une alerte SweetAlert
+            $('body').on('click', '.logout', function(e) {
+                e.preventDefault();
+                const form = $(this).closest('form');
+                swal({
+                    title: "Êtes-vous sûr ?",
+                    text: "Vous allez être déconnecté.",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willLogout) => {
+                    if (willLogout) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
