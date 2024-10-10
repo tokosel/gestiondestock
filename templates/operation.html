@@ -89,7 +89,7 @@
                             icon: 'success',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                            location.reload();  // Recharge la page après succès
+                            location.reload();
                         });
                     } else {
                         Swal.fire({
@@ -100,15 +100,21 @@
                         });
                     }
                 },
-                error: function () {
+                error: function (xhr) {
+                    // Récupération du message d'erreur spécifique depuis la réponse
+                    var errorMessage = xhr.responseJSON && xhr.responseJSON.message 
+                        ? xhr.responseJSON.message 
+                        : "Une erreur s'est produite lors de l'enregistrement de l'opération.";
+                    
                     Swal.fire({
                         title: 'Erreur!',
-                        text: "Une erreur s'est produite lors de l'enregistrement de l'opération.",
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonText: 'OK'
                     });
                 }
             });
+            
         });
     });
 </script>

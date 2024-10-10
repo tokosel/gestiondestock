@@ -16,9 +16,6 @@ from flask import send_file
 from fpdf import FPDF
 from functools import wraps
 app = Flask(__name__)
-#app.config["MONGO_URI"] = "mongodb://localhost:27017/stock_management"
-#app.config["SECRET_KEY"] = "super_secret_key"
-#app.config["MONGO_URI"] = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
 uri = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
 app.config["SECRET_KEY"] = "super_secret_key"
 mongo = MongoClient(uri, server_api=ServerApi('1'))
@@ -236,9 +233,7 @@ def index():
 #Alerte faible stock
 @app.context_processor
 def inject_low_stock_products():
-    # Récupérer tous les produits ayant une quantité inférieure à 5
     low_stock_products = list(db_produits.find({"statut": "actif","quantite": {"$lt": 5}}))  # Convertir le curseur en liste
-    # Compter le nombre de produits en faible quantité
     low_stock_count = len(low_stock_products)
     # Passer les produits et le nombre au template
     return dict(low_stock_products=low_stock_products, low_stock_count=low_stock_count)
@@ -246,6 +241,8 @@ def inject_low_stock_products():
 
 # Page d'ajout utilisateurs
 @app.route("/adduser", methods=["GET", "POST"])
+@login_required
+@admin_required
 def add_user():
     if request.method == "POST":
         name = request.form.get("name")
@@ -532,8 +529,17 @@ def add_operation():
     quantite = int(request.form.get("quantite"))    
     date_aujourdhui = datetime.now()
     operateur = session.get("user_name")    
+
+    produit = db_produits.find_one({"_id": ObjectId(produit_id)})
+    
+    if produit is None:
+        return jsonify({"status": "error", "message": "Produit non trouvé!"}), 404
+    
     if type_operation == "vente":
-        produit = db_produits.find_one({"_id": ObjectId(produit_id)})
+        # Vérification de la disponibilité en stock
+        if quantite > produit["quantite"]:
+            return jsonify({"status": "error", "message": "Quantité non disponible en stock!"}), 400
+
         montant = quantite * produit["prix"]
         db_ventes.insert_one({
             "produit_id": ObjectId(produit_id),
@@ -543,8 +549,8 @@ def add_operation():
             "operateur": operateur
         })
         db_produits.update_one({"_id": ObjectId(produit_id)}, {"$inc": {"quantite": -quantite}})
+
     elif type_operation == "achat":
-        produit = db_produits.find_one({"_id": ObjectId(produit_id)})
         prix = float(request.form['prix'])
         fournisseur_id = request.form.get("fournisseur_id")
         montant = quantite * prix
@@ -558,6 +564,7 @@ def add_operation():
             "operateur": operateur
         })
         db_produits.update_one({"_id": ObjectId(produit_id)}, {"$inc": {"quantite": quantite}})
+
     return jsonify({"status": "success", "message": "Opération enregistrée avec succès!"})
 
 # Liste des achats 
