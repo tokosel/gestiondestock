@@ -1,6 +1,8 @@
 from flask import Flask, render_template,jsonify, request, redirect, url_for, flash, session
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 import datetime
 from datetime import datetime
 from bson.objectid import ObjectId
@@ -16,9 +18,10 @@ from functools import wraps
 app = Flask(__name__)
 #app.config["MONGO_URI"] = "mongodb://localhost:27017/stock_management"
 #app.config["SECRET_KEY"] = "super_secret_key"
-app.config["MONGO_URI"] = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
+#app.config["MONGO_URI"] = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
+uri = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
 app.config["SECRET_KEY"] = "super_secret_key"
-mongo = PyMongo(app)
+mongo = MongoClient(uri, server_api=ServerApi('1'))
 db_users = mongo.db.users
 db_fournisseurs = mongo.db.fournisseurs
 db_categories = mongo.db.categories
