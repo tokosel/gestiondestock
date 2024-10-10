@@ -14,9 +14,9 @@ from flask import send_file
 from fpdf import FPDF
 from functools import wraps
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/stock_management"
+#app.config["MONGO_URI"] = "mongodb://localhost:27017/stock_management"
 #app.config["SECRET_KEY"] = "super_secret_key"
-#app.config["MONGO_URI"] = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
+app.config["MONGO_URI"] = "mongodb+srv://tokodev:passer123@stock.mglx8.mongodb.net/?retryWrites=true&w=majority&appName=Stock"
 app.config["SECRET_KEY"] = "super_secret_key"
 mongo = PyMongo(app)
 db_users = mongo.db.users
