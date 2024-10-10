@@ -246,8 +246,6 @@ def inject_low_stock_products():
 
 # Page d'ajout utilisateurs
 @app.route("/adduser", methods=["GET", "POST"])
-@login_required
-@admin_required
 def add_user():
     if request.method == "POST":
         name = request.form.get("name")
