@@ -79,7 +79,7 @@ def logout():
     flash('Vous avez été déconnecté avec succès.', 'info')
     return redirect(url_for('login'))
 
-#Conversion
+# Conversion ObjectId en chaîne
 def convert_objectid_to_str(data):
     if isinstance(data, list):
         return [convert_objectid_to_str(item) for item in data]
@@ -89,23 +89,32 @@ def convert_objectid_to_str(data):
         return str(data)
     return data
 
-#Tableau de bord
+# Fonction de formatage des nombres
+def format_number(n):
+    if n >= 1_000_000:
+        return f"{n / 1_000_000:.1f}M"  # Format en millions
+    elif n >= 1_000:
+        return f"{n / 1_000:.1f}k"  # Format en milliers
+    else:
+        return str(n)  # Si le nombre est inférieur à 1 000, ne pas le formater
+
+# Route pour le tableau de bord
 @app.route('/')
 @login_required
 def index():
     # 1. Total des produits (produits actifs seulement)
     total_produits = db_produits.count_documents({"statut": "actif"})
-    
+
     # 2. Nombre de produits en faible quantité (quantité inférieure à un seuil, ex: < 5)
     seuil_critique = 5
     produits_faible_quantite = db_produits.count_documents({"statut": "actif", "quantite": {"$lt": seuil_critique}})
-    
+
     # 3. Total des ventes
     total_ventes = db_ventes.aggregate([
         {"$group": {"_id": None, "total_ventes": {"$sum": "$quantite_achetee"}}}
     ])
     total_ventes = list(total_ventes)[0]['total_ventes'] if total_ventes else 0
-    
+
     # 4. Chiffre d'affaires total (quantité * prix de vente)
     chiffre_affaires_total = db_ventes.aggregate([
         {"$group": {"_id": None, "total_revenue": {"$sum": "$montant"}}}
@@ -142,6 +151,10 @@ def index():
         {"$sort": {"_id": 1}}
     ]))
 
+    # Debug: Log les résultats de l'agrégation pour ca_par_mois et achats_par_mois
+    print("ca_par_mois:", ca_par_mois)
+    print("achats_par_mois:", achats_par_mois)
+
     # Récupération des produits les plus vendus
     produits_les_plus_vendus = list(mongo.db.ventes.aggregate([
         {
@@ -170,6 +183,9 @@ def index():
         {"$sort": {"total_vendu": -1}},
         {"$limit": 5}
     ]))
+
+    # Debug: Log les résultats de l'agrégation pour produits les plus vendus
+    print("produits_les_plus_vendus:", produits_les_plus_vendus)
 
     # Récupération des produits rentables
     produits_rentables = list(mongo.db.ventes.aggregate([
@@ -200,6 +216,9 @@ def index():
         {"$limit": 5}
     ]))
 
+    # Debug: Log les résultats de l'agrégation pour produits rentables
+    print("produits_rentables:", produits_rentables)
+
     # Récupération du chiffre d'affaires par jour
     ca_par_jour = list(mongo.db.ventes.aggregate([
         {
@@ -211,24 +230,39 @@ def index():
         {"$sort": {"_id": 1}}
     ]))
 
+    # Debug: Log les résultats de l'agrégation pour ca_par_jour
+    print("ca_par_jour:", ca_par_jour)
+
     # Conversion des ObjectId en chaînes de caractères
     ca_par_mois = convert_objectid_to_str(ca_par_mois)
     achats_par_mois = convert_objectid_to_str(achats_par_mois)
     produits_les_plus_vendus = convert_objectid_to_str(produits_les_plus_vendus)
     produits_rentables = convert_objectid_to_str(produits_rentables)
     ca_par_jour = convert_objectid_to_str(ca_par_jour)
+
+    # Formatage des données pour l'affichage
+    total_ventes_affiche = format_number(total_ventes)
+    chiffre_affaires_total_affiche = format_number(chiffre_affaires_total)
+    montant_total_achats_affiche = format_number(montant_total_achats)
+    benefice_total_affiche = format_number(benefice_total)
+    ca_par_mois = convert_objectid_to_str(ca_par_mois)
+    achats_par_mois = convert_objectid_to_str(achats_par_mois)
+    produits_les_plus_vendus = convert_objectid_to_str(produits_les_plus_vendus)
+    produits_rentables = convert_objectid_to_str(produits_rentables)
+    ca_par_jour = convert_objectid_to_str(ca_par_jour)
     return render_template('index.html', 
-                           total_produits=total_produits,
-                           produits_faible_quantite=produits_faible_quantite,
-                           total_ventes=total_ventes,
-                           chiffre_affaires_total=chiffre_affaires_total,
-                           montant_total_achats=montant_total_achats,
-                           benefice_total=benefice_total,
-                           ca_par_mois=ca_par_mois,
-                           achats_par_mois=achats_par_mois,
-                           produits_les_plus_vendus=produits_les_plus_vendus,
-                           produits_rentables=produits_rentables,
-                           ca_par_jour=ca_par_jour)
+                            total_produits=total_produits,
+                            produits_faible_quantite=produits_faible_quantite,
+                            total_ventes=total_ventes_affiche,
+                            chiffre_affaires_total=chiffre_affaires_total_affiche,
+                            montant_total_achats=montant_total_achats_affiche,
+                            benefice_total=benefice_total_affiche,
+                            ca_par_mois=ca_par_mois,
+                            achats_par_mois=achats_par_mois,
+                            produits_les_plus_vendus=produits_les_plus_vendus,
+                            produits_rentables=produits_rentables,
+                            ca_par_jour=ca_par_jour)
+
 
 #Alerte faible stock
 @app.context_processor
