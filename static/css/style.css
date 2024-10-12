@@ -5,3 +5,9 @@
 .alert-product{
     color: #e94918 !important;
 }
+
+.btn-login{
+    background-color: #128ea3;
+    border-color: #128ea3;
+    text-transform: uppercase;
+}
